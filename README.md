@@ -117,12 +117,14 @@ curl http://localhost:3000/api/tasks
 ## Testes
 
 ```bash
+# Antes de rodar testes, iniciar o servidor
+npm run dev &
+
 # Rodar testes
 npm test
-
-# Rodar testes com cobertura
-npm test -- --coverage
 ```
+
+> Nota: Os testes precisam que o servidor esteja rodando em `http://localhost:3000`
 
 ## Docker
 
