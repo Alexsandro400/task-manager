@@ -9,3 +9,5 @@ build
 *.env.test.local
 *.env.production.local
 coverage
+k8s/
+.github/
