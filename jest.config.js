@@ -1,10 +1,6 @@
-{
-  "testMatch": ["**/tests/**/*.test.js"],
-  "testPathIgnorePatterns": ["/node_modules/", "/.next/"],
-  "modulePathIgnorePatterns": ["/.next/", "/out/"],
-  "collectCoverageFrom": [
-    "app/**/*.js",
-    "!app/**/*.test.js",
-    "!app/**/*.spec.js"
-  ]
+module.exports = {
+  testEnvironment: 'node',
+  moduleNameMapper: {
+    '^pg$': '<rootDir>/__mocks__/pg.js',
+  },
 }
