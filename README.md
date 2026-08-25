@@ -180,19 +180,6 @@ npm test
 npm test -- --coverage
 ```
 
-## Deployment
-
-### Kubernetes
-
-Ver branch `dev_aula` para manifests Kubernetes e CI/CD.
-
-### Docker Hub
-
-```bash
-docker build -t profdiegoluispires/task-manager:latest .
-docker push profdiegoluispires/task-manager:latest
-```
-
 ## License
 
 MIT
