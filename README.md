@@ -1,16 +1,41 @@
-# Task Manager - Kubernetes & CI/CD
+# Task Manager
 
-Este repositório contém o código completo do Task Manager para o curso de Kubernetes e GitHub Actions.
+Gerenciador de Tarefas (Task Manager) com Next.js 14, PostgreSQL e Docker.
+
+## Demonstração
+
+![Task Manager UI](https://via.placeholder.com/800x500?text=Task+Manager+UI)
+
+## Funcionalidades
+
+- **CRUD completo** de tarefas (Create, Read, Update, Delete)
+- **Status das tarefas**: pendente, em-andamento, concluída
+- **Prioridades**: baixa, média, alta
+- **Dashboard**: estatísticas e filtros
+- **API REST**: endpoints para integração
+- **Health check**: endpoint para monitoramento
+
+## Stack Tecnológica
+
+- **Frontend**: Next.js 14 (App Router), Tailwind CSS
+- **Backend**: Next.js API Routes
+- **Banco de dados**: PostgreSQL 15
+- **Containerização**: Docker, Docker Compose
+- **Testes**: Jest
 
 ## Estrutura do Projeto
 
 ```
 task-manager/
 ├── app/              # App Next.js (App Router)
+│   ├── api/          # API Routes
+│   ├── layout.js     # Layout raiz
+│   ├── page.js       # Página principal (UI)
+│   └── globals.css   # Estilos globais Tailwind
 ├── lib/              # Funções de banco de dados
+│   ├── db.js         # Pool PostgreSQL
+│   └── dbConfig.js   # Configuração de conexão
 ├── tests/            # Testes Jest para API
-├── k8s/              # Manifets Kubernetes
-├── .github/          # Workflows GitHub Actions
 ├── Dockerfile        # Build da imagem Docker
 ├── docker-compose.yml # Ambiente local com Docker Compose
 ├── next.config.js    # Config Next.js
@@ -18,55 +43,93 @@ task-manager/
 └── package.json      # Dependências
 ```
 
-## Kubernetes Manifests
+## Instalação e Execução Local
 
-Os manifests Kubernetes estão em `k8s/`:
+### Pré-requisitos
 
-- `configmap.yaml`: Variáveis de ambiente
-- `app-deployment.yaml`: Deployment da aplicação (2 réplicas)
-- `app-service.yaml`: Service NodePort 30080
-- `postgres-deployment.yaml`: Deployment PostgreSQL 15
-- `postgres-service.yaml`: Service ClusterIP PostgreSQL
+- Docker e Docker Compose
+- Node.js 20+ (opcional, para desenvolvimento local sem Docker)
 
-## GitHub Actions CI/CD
-
-O workflow `.github/workflows/ci-cd.yml` inclui:
-
-1. **test**: Roda `npm test` para validar a API
-2. **build**: Build da imagem Docker
-3. **deploy**: Push para Docker Hub (apenas branch `dev_aula`)
-
-## Deploy no K3D
+### Com Docker Compose (Recomendado)
 
 ```bash
-# Criar cluster
-k3d cluster create taskmanager
+# Iniciar containers
+docker-compose up -d
 
-# Aplicar manifests
-kubectl apply -f k8s/configmap.yaml
-kubectl apply -f k8s/postgres-deployment.yaml
-kubectl apply -f k8s/postgres-service.yaml
-kubectl apply -f k8s/app-deployment.yaml
-kubectl apply -f k8s/app-service.yaml
-
-# Verificar pods
-kubectl get pods
-kubectl get services
-
-# Acessar aplicação
-open http://localhost:30080
+# Acessar a aplicação
+open http://localhost:3000
 ```
+
+### Desenvolvimento Local
+
+```bash
+# Instalar dependências
+npm install
+
+# Criar arquivo .env (baseado em .env.example)
+cp .env.example .env
+
+# Executar migrations e iniciar servidor
+npm run dev
+```
+
+## API REST
+
+### Endpoints
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| GET | `/api/tasks` | Listar todas as tarefas |
+| GET | `/api/tasks/:id` | Buscar tarefa por ID |
+| POST | `/api/tasks` | Criar nova tarefa |
+| PUT | `/api/tasks/:id` | Atualizar tarefa |
+| DELETE | `/api/tasks/:id` | Deletar tarefa |
+| GET | `/api/health` | Health check |
+
+### Exemplo de Request
+
+```bash
+# Criar tarefa
+curl -X POST http://localhost:3000/api/tasks \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Minha tarefa","description":"Descrição","priority":"alta","status":"pendente"}'
+
+# Listar tarefas
+curl http://localhost:3000/api/tasks
+```
+
+## Testes
+
+```bash
+# Rodar testes
+npm test
+
+# Rodar testes com cobertura
+npm test -- --coverage
+```
+
+## Docker
+
+### Build da Imagem
+
+```bash
+docker build -t task-manager .
+```
+
+### Executar com Docker
+
+```bash
+docker run -p 3000:3000 task-manager
+```
+
+## Kubernetes
+
+Para deploy em Kubernetes, veja a branch `dev_aula` com manifests e CI/CD.
 
 ## Branches
 
-- **main**: Código completo sem k8s/.github
-- **dev_aula**: Código + k8s + CI/CD
-
-## Requisitos
-
-- Docker e Docker Compose
-- Node.js 20+
-- PostgreSQL 15 (ou usar docker-compose)
+- **main**: Código completo (Next.js + API + Docker) - sem k8s/.github
+- **dev_aula**: Código + k8s + CI/CD (para aula)
 
 ## Licença
 
