@@ -1,173 +1,111 @@
-# Task Manager - Next.js + PostgreSQL
+# Task Manager
 
-## Descrição
+Gerenciador de Tarefas (Task Manager) com Next.js 14, PostgreSQL, Kubernetes e CI/CD.
 
-Aplicação web de gerenciamento de tarefas construída com **Next.js 14**, **Tailwind CSS** e **PostgreSQL**.
+## Demonstração
 
-Demonstra:
-- CRUD completo de tarefas (Create, Read, Update, Delete)
-- Status: `pendente`, `em-andamento`, `concluida`
-- Prioridade: `baixa`, `media`, `alta` (com cores distintas)
-- UI moderna e responsiva
-- API REST com validações
-- Conexão com banco de dados PostgreSQL
+![Task Manager UI](https://via.placeholder.com/800x500?text=Task+Manager+UI)
 
-## Pré-requisitos
+## Funcionalidades
 
-- **Node.js** 18+ e **npm**
-- **Docker** e **Docker Compose** (para rodar PostgreSQL localmente)
-- **PostgreSQL** 15+ (opcional, se rodar localmente)
+- **CRUD completo** de tarefas (Create, Read, Update, Delete)
+- **Status das tarefas**: pendente, em-andamento, concluída
+- **Prioridades**: baixa, média, alta
+- **Dashboard**: estatísticas e filtros
+- **API REST**: endpoints para integração
+- **Health check**: endpoint para monitoramento
 
-## Rodando Localmente
+## Stack Tecnológica
 
-### Opção 1: Com Docker Compose (Recomendado)
-
-```bash
-# Subir PostgreSQL
-docker-compose up -d postgres
-
-# Instalar dependências
-npm install
-
-# Rodar app
-npm run dev
-```
-
-Acessar: http://localhost:3000
-
-### Opção 2: Diretamente (PostgreSQL instalado)
-
-```bash
-# Criar banco
-createdb task_manager
-
-# Rodar app
-npm run dev
-```
-
-Configurar variável de ambiente `DATABASE_URL` se necessário.
+- **Frontend**: Next.js 14 (App Router), Tailwind CSS
+- **Backend**: Next.js API Routes
+- **Banco de dados**: PostgreSQL 15
+- **Containerização**: Docker, Docker Compose
+- **Orquestração**: Kubernetes
+- **CI/CD**: GitHub Actions
+- **Testes**: Jest
 
 ## Estrutura do Projeto
 
 ```
 task-manager/
-├── app/
-│   ├── layout.js          # Layout raiz com Provider
-│   ├── page.js            # Página principal (UI do Task Manager)
-│   └── globals.css        # Estilos globais Tailwind
-├── lib/
-│   └── db.js              # Utilitários de conexão PostgreSQL
-├── api/
-│   └── tasks/
-│       └── route.js       # API REST CRUD
-├── public/                # Arquivos estáticos
-├── tests/
-│   └── api.test.js        # Testes da API
-├── package.json
-├── next.config.js
-├── tailwind.config.js
-├── postcss.config.js
-├── docker-compose.yml     # PostgreSQL local
-└── Dockerfile             # Imagem Docker
+├── app/              # App Next.js (App Router)
+│   ├── api/          # API Routes
+│   ├── layout.js     # Layout raiz
+│   ├── page.js       # Página principal (UI)
+│   └── globals.css   # Estilos globais Tailwind
+├── lib/              # Funções de banco de dados
+│   ├── db.js         # Pool PostgreSQL
+│   └── dbConfig.js   # Configuração de conexão
+├── tests/            # Testes Jest para API
+├── k8s/              # Manifets Kubernetes
+│   ├── configmap.yaml
+│   ├── app-deployment.yaml
+│   ├── app-service.yaml
+│   ├── postgres-deployment.yaml
+│   └── postgres-service.yaml
+├── .github/workflows/ # CI/CD GitHub Actions
+│   └── ci-cd.yml
+├── Dockerfile        # Build da imagem Docker
+├── docker-compose.yml # Ambiente local com Docker Compose
+├── next.config.js    # Config Next.js
+├── tailwind.config.js # Config Tailwind CSS
+└── package.json      # Dependências
 ```
 
-## Funcionalidades
+## Instalação e Execução Local
 
-### ✅ API
-- **GET** `/api/tasks` - Listar todas as tarefas
-- **POST** `/api/tasks` - Criar nova tarefa
-- **PUT** `/api/tasks/[id]` - Atualizar tarefa
-- **DELETE** `/api/tasks/[id]` - Deletar tarefa
-- **GET** `/api/health` - Health check
+### Pré-requisitos
 
-### ✅ UI
-- Lista de tarefas com filtros por status e prioridade
-- Formulário para criar/editar tarefas
-- Cards coloridos por prioridade:
-  - 🟢 Baixa (verde)
-  - 🟡 Média (amarelo)
-  - 🔴 Alta (vermelho)
-- Status visual:
-  - ⏳ Pendente (cinza)
-  - 🔄 Em andamento (azul)
-  - ✅ Concluído (verde)
+- Docker e Docker Compose
+- Node.js 20+ (opcional, para desenvolvimento local sem Docker)
 
-### ✅ Testes
-- Testes unitários da API com Jest
-- Cobertura: endpoints CRUD, validações, erros
-
-## Docker
-
-### Build da imagem
+### Com Docker Compose (Recomendado)
 
 ```bash
-docker build -t task-manager:latest .
+# Iniciar containers
+docker-compose up -d
+
+# Acessar a aplicação
+open http://localhost:3000
 ```
 
-### Rodar com Docker Compose
+### Desenvolvimento Local
 
 ```bash
-docker-compose up --build
+# Instalar dependências
+npm install
+
+# Criar arquivo .env (baseado em .env.example)
+cp .env.example .env
+
+# Executar migrations e iniciar servidor
+npm run dev
 ```
 
-### Rodar sozinho (com banco)
+## API REST
+
+### Endpoints
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| GET | `/api/tasks` | Listar todas as tarefas |
+| GET | `/api/tasks/:id` | Buscar tarefa por ID |
+| POST | `/api/tasks` | Criar nova tarefa |
+| PUT | `/api/tasks/:id` | Atualizar tarefa |
+| DELETE | `/api/tasks/:id` | Deletar tarefa |
+| GET | `/api/health` | Health check |
+
+### Exemplo de Request
 
 ```bash
-# Criar network
-docker network create task-network
-
-# Subir PostgreSQL
-docker run -d \
-  --name postgres \
-  --network task-network \
-  -e POSTGRES_USER=admin \
-  -e POSTGRES_PASSWORD=admin \
-  -e POSTGRES_DB=task_manager \
-  -p 5432:5432 \
-  postgres:15
-
-# Rodar app
-docker run -d \
-  --name task-manager \
-  --network task-network \
-  -p 3000:3000 \
-  -e DATABASE_URL=postgres://admin:admin@postgres:5432/task_manager \
-  task-manager:latest
-```
-
-## Variáveis de Ambiente
-
-| Variável | Descrição | Padrão |
-|----------|-----------|--------|
-| `PORT` | Porta do servidor | `3000` |
-| `DATABASE_URL` | URL de conexão PostgreSQL | `postgres://admin:admin@localhost:5432/task_manager` |
-
-## API Reference
-
-### Criar Tarefa
-
-```bash
+# Criar tarefa
 curl -X POST http://localhost:3000/api/tasks \
   -H "Content-Type: application/json" \
-  -d '{
-    "title": "Minha tarefa",
-    "description": "Descrição detalhada",
-    "status": "pendente",
-    "priority": "alta"
-  }'
-```
+  -d '{"title":"Minha tarefa","description":"Descrição","priority":"alta","status":"pendente"}'
 
-### Resposta
-
-```json
-{
-  "id": "uuid-gerado",
-  "title": "Minha tarefa",
-  "description": "Descrição detalhada",
-  "status": "pendente",
-  "priority": "alta",
-  "created_at": "2024-01-01T00:00:00.000Z"
-}
+# Listar tarefas
+curl http://localhost:3000/api/tasks
 ```
 
 ## Testes
@@ -180,6 +118,93 @@ npm test
 npm test -- --coverage
 ```
 
-## License
+## Docker
+
+### Build da Imagem
+
+```bash
+docker build -t task-manager .
+```
+
+### Executar com Docker
+
+```bash
+docker run -p 3000:3000 task-manager
+```
+
+## Kubernetes Deploy
+
+### Pré-requisitos
+
+- K3d ou cluster Kubernetes
+- `kubectl` configurado
+
+### Criar Cluster (K3d)
+
+```bash
+k3d cluster create taskmanager
+```
+
+### Aplicar Manifests
+
+```bash
+# Aplicar ConfigMap
+kubectl apply -f k8s/configmap.yaml
+
+# Aplicar PostgreSQL
+kubectl apply -f k8s/postgres-deployment.yaml
+kubectl apply -f k8s/postgres-service.yaml
+
+# Aguardar PostgreSQL estar pronto
+kubectl wait --for=condition=ready pod -l app=postgres --timeout=120s
+
+# Aplicar aplicação
+kubectl apply -f k8s/app-deployment.yaml
+kubectl apply -f k8s/app-service.yaml
+```
+
+### Verificar Deploy
+
+```bash
+# Ver pods
+kubectl get pods
+
+# Ver services
+kubectl get services
+
+# Ver logs do app
+kubectl logs -l app=task-manager -f
+```
+
+### Acessar Aplicação
+
+```bash
+# Local (K3d)
+open http://localhost:30080
+
+# Com port-forward
+kubectl port-forward service/task-manager-service 3000:3000
+open http://localhost:3000
+```
+
+## CI/CD GitHub Actions
+
+O workflow `.github/workflows/ci-cd.yml` executa:
+
+1. **test**: Roda `npm test` para validar a API
+2. **build**: Build da imagem Docker com tag SHA
+3. **deploy**: Push para Docker Hub (apenas branch `dev_aula`)
+
+### Secrets Necessários
+
+- `DOCKER_USERNAME`: Nome de usuário do Docker Hub
+- `DOCKER_PASSWORD`: Token de acesso do Docker Hub
+
+## Branches
+
+- **main**: Código completo (Next.js + API + Docker) - sem k8s/.github
+- **dev_aula**: Código + k8s + CI/CD (para aula)
+
+## Licença
 
 MIT

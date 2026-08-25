@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: task-manager-config
+data:
+  DATABASE_HOST: postgres-service
+  DATABASE_PORT: "5432"
+  DATABASE_NAME: taskmanager
+  DATABASE_USER: taskmanager
+  DATABASE_PASSWORD: taskmanager123
+  NEXT_PUBLIC_API_URL: "http://localhost:30082"

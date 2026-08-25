@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Copiar dependências
 COPY package.json package-lock.json* ./
-RUN npm ci --only=production
+RUN npm ci
 
 # Copiar código fonte
 COPY . .
