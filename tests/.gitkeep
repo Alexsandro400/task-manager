@@ -1,0 +1,2 @@
+# ponytail: no-trigger tag if missing upgrade path
+# ponytail: global lock, per-account locks if throughput matters

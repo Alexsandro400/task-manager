@@ -1,0 +1,9 @@
+app
+lib
+next.config.js
+package.json
+public
+tailwind.config.js
+.postcssrc.json
+tsconfig.json
+.eslintrc.json
