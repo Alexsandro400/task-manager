@@ -9,3 +9,4 @@ build
 *.env.test.local
 *.env.production.local
 coverage
+package-lock.json
