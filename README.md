@@ -66,14 +66,15 @@ task-manager/
 # Iniciar containers
 docker compose up -d
 
-# Aguardar banco de dados inicializar
-sleep 5
-
 # Acessar a aplicação
 open http://localhost:3000
 
 # Verificar health check
 curl http://localhost:3000/api/health
+
+# Se precisar resetar o banco de dados
+docker compose down -v
+docker compose up -d
 ```
 
 ### Desenvolvimento Local
