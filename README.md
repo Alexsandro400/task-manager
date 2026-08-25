@@ -1,4 +1,4 @@
-# Task Manager - Next.js + PostgreSQL
+# Task Manager - Next.js + PostgreSQL + Kubernetes
 
 ## Descrição
 
@@ -11,65 +11,105 @@ Demonstra:
 - UI moderna e responsiva
 - API REST com validações
 - Conexão com banco de dados PostgreSQL
+- **Deployment no Kubernetes**
+- **CI/CD com GitHub Actions**
+
+## 🚀 Quick Deploy no Kubernetes (K3D)
+
+### 1. Criar cluster K3D
+
+```bash
+k3d cluster create task-manager-cluster
+```
+
+### 2. Aplicar manifests Kubernetes
+
+```bash
+# Criar ConfigMap
+kubectl apply -f k8s/configmap.yaml
+
+# Criar PostgreSQL
+kubectl apply -f k8s/postgres-deployment.yaml
+kubectl apply -f k8s/postgres-service.yaml
+
+# Criar Task Manager
+kubectl apply -f k8s/app-deployment.yaml
+kubectl apply -f k8s/app-service.yaml
+```
+
+### 3. Acessar a aplicação
+
+```bash
+# NodePort (K3D)
+http://localhost:30080
+
+# Verificar status
+kubectl get pods -l app=task-manager
+kubectl get pods -l app=postgres
+kubectl get svc task-manager
+```
+
+### 4. Testar Load Balancing
+
+Acesse `http://localhost:30080` múltiplas vezes. Você verá diferentes pods respondendo!
+
+---
+
+## Setup Local (Docker Compose)
+
+### 1. Subir containers
+
+```bash
+docker-compose up -d
+```
+
+### 2. Acessar
+
+http://localhost:3000
+
+---
 
 ## Pré-requisitos
 
-- **Node.js** 18+ e **npm**
-- **Docker** e **Docker Compose** (para rodar PostgreSQL localmente)
-- **PostgreSQL** 15+ (opcional, se rodar localmente)
+- **Node.js** 18+ e **npm** (para desenvolvimento local)
+- **Docker** e **Docker Compose** (para rodar localmente)
+- **Kubernetes** (k3d, minikube, ou cluster remoto)
+- **kubectl** (para gerenciar o cluster)
+- **GitHub Actions** (para CI/CD)
 
-## Rodando Localmente
-
-### Opção 1: Com Docker Compose (Recomendado)
-
-```bash
-# Subir PostgreSQL
-docker-compose up -d postgres
-
-# Instalar dependências
-npm install
-
-# Rodar app
-npm run dev
-```
-
-Acessar: http://localhost:3000
-
-### Opção 2: Diretamente (PostgreSQL instalado)
-
-```bash
-# Criar banco
-createdb task_manager
-
-# Rodar app
-npm run dev
-```
-
-Configurar variável de ambiente `DATABASE_URL` se necessário.
+---
 
 ## Estrutura do Projeto
 
 ```
 task-manager/
 ├── app/
-│   ├── layout.js          # Layout raiz com Provider
-│   ├── page.js            # Página principal (UI do Task Manager)
-│   └── globals.css        # Estilos globais Tailwind
+│   ├── layout.js          # Layout raiz
+│   ├── page.js            # Página principal (UI)
+│   └── globals.css        # Estilos Tailwind
 ├── lib/
-│   └── db.js              # Utilitários de conexão PostgreSQL
+│   └── db.js              # Conexão PostgreSQL
 ├── api/
 │   └── tasks/
 │       └── route.js       # API REST CRUD
-├── public/                # Arquivos estáticos
+│   └── health/
+│       └── route.js       # Health check
 ├── tests/
 │   └── api.test.js        # Testes da API
-├── package.json
-├── next.config.js
-├── tailwind.config.js
-├── postcss.config.js
-├── docker-compose.yml     # PostgreSQL local
-└── Dockerfile             # Imagem Docker
+├── k8s/
+│   ├── configmap.yaml     # Configuração do app
+│   ├── app-deployment.yaml    # Deployment do app
+│   ├── app-service.yaml       # Service do app (NodePort 30080)
+│   ├── postgres-deployment.yaml  # Deployment do DB
+│   └── postgres-service.yaml     # Service do DB
+├── .github/workflows/
+│   └── ci-cd.yml          # CI/CD Pipeline
+├── docker-compose.yml     # App + PostgreSQL local
+├── Dockerfile             # Imagem Docker
+└── README.md              # Este arquivo
 ```
+
+---
 
 ## Funcionalidades
 
@@ -81,7 +121,7 @@ task-manager/
 - **GET** `/api/health` - Health check
 
 ### ✅ UI
-- Lista de tarefas com filtros por status e prioridade
+- Lista de tarefas com filtros por status
 - Formulário para criar/editar tarefas
 - Cards coloridos por prioridade:
   - 🟢 Baixa (verde)
@@ -94,11 +134,108 @@ task-manager/
 
 ### ✅ Testes
 - Testes unitários da API com Jest
-- Cobertura: endpoints CRUD, validações, erros
+
+### ✅ Kubernetes
+- Deployment com 2 réplicas
+- Service NodePort 30080
+- PostgreSQL em pod separado
+- ConfigMaps para configuração
+- Health checks integrados
+- Resource requests/limits
+
+---
+
+## GitHub Actions CI/CD
+
+### Pipeline
+1. **Test job** - Roda testes com Jest
+2. **Build job** - Build Docker image
+3. **Deploy job** - Push para Docker Hub (apenas branch `dev_aula`)
+
+### Secrets necessários
+- `DOCKER_USERNAME` - Seu Docker Hub username
+- `DOCKER_PASSWORD` - Token de acesso do Docker Hub
+
+### Configuração
+1. Acesse **Settings** → **Secrets and variables** → **Actions**
+2. Adicione os secrets acima
+3. Push para `dev_aula` dispara o pipeline
+
+---
+
+## Variáveis de Ambiente
+
+| Variável | Descrição | Padrão |
+|----------|-----------|--------|
+| `PORT` | Porta do servidor | `3000` |
+| `DATABASE_HOST` | Host do PostgreSQL | `postgres` (K8s) |
+| `DATABASE_PORT` | Porta do PostgreSQL | `5432` |
+| `DATABASE_NAME` | Nome do banco | `task_manager` |
+| `DATABASE_USER` | Usuário do DB | `admin` |
+| `DATABASE_PASSWORD` | Senha do DB | `admin` |
+
+---
+
+## Kubernetes Manifests
+
+### ConfigMap
+Configuração do ambiente do Task Manager (variáveis de DB).
+
+### App Deployment
+- 2 réplicas do Task Manager
+- Health checks (liveness + readiness)
+- Resource limits: 256Mi memory, 200m CPU
+- Pull da imagem `profdiegoluispires/task-manager:latest`
+
+### App Service
+- Type: NodePort
+- Port: 80 → 30080 (K3D)
+- Load balance entre pods
+
+### PostgreSQL Deployment
+- 1 réplica do PostgreSQL 15
+- Volume temporário (emptyDir) para dados
+- Resource limits: 512Mi memory, 200m CPU
+
+### PostgreSQL Service
+- Type: ClusterIP
+- Port: 5432
+
+---
+
+## Deploy Manual no Kubernetes
+
+```bash
+# Criar cluster
+k3d cluster create task-manager-cluster
+
+# Aplicar manifests
+kubectl apply -f k8s/
+
+# Verificar status
+kubectl get all
+
+# Acessar
+http://localhost:30080
+```
+
+---
+
+## Testes
+
+```bash
+# Rodar local
+npm test
+
+# Com cobertura
+npm test -- --coverage
+```
+
+---
 
 ## Docker
 
-### Build da imagem
+### Build
 
 ```bash
 docker build -t task-manager:latest .
@@ -107,91 +244,26 @@ docker build -t task-manager:latest .
 ### Rodar com Docker Compose
 
 ```bash
-docker-compose up --build
+docker-compose up -d
 ```
 
-### Rodar sozinho (com banco)
+### Push para Docker Hub
 
 ```bash
-# Criar network
-docker network create task-network
-
-# Subir PostgreSQL
-docker run -d \
-  --name postgres \
-  --network task-network \
-  -e POSTGRES_USER=admin \
-  -e POSTGRES_PASSWORD=admin \
-  -e POSTGRES_DB=task_manager \
-  -p 5432:5432 \
-  postgres:15
-
-# Rodar app
-docker run -d \
-  --name task-manager \
-  --network task-network \
-  -p 3000:3000 \
-  -e DATABASE_URL=postgres://admin:admin@postgres:5432/task_manager \
-  task-manager:latest
-```
-
-## Variáveis de Ambiente
-
-| Variável | Descrição | Padrão |
-|----------|-----------|--------|
-| `PORT` | Porta do servidor | `3000` |
-| `DATABASE_URL` | URL de conexão PostgreSQL | `postgres://admin:admin@localhost:5432/task_manager` |
-
-## API Reference
-
-### Criar Tarefa
-
-```bash
-curl -X POST http://localhost:3000/api/tasks \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title": "Minha tarefa",
-    "description": "Descrição detalhada",
-    "status": "pendente",
-    "priority": "alta"
-  }'
-```
-
-### Resposta
-
-```json
-{
-  "id": "uuid-gerado",
-  "title": "Minha tarefa",
-  "description": "Descrição detalhada",
-  "status": "pendente",
-  "priority": "alta",
-  "created_at": "2024-01-01T00:00:00.000Z"
-}
-```
-
-## Testes
-
-```bash
-# Rodar testes
-npm test
-
-# Rodar testes com cobertura
-npm test -- --coverage
-```
-
-## Deployment
-
-### Kubernetes
-
-Ver branch `dev_aula` para manifests Kubernetes e CI/CD.
-
-### Docker Hub
-
-```bash
-docker build -t profdiegoluispires/task-manager:latest .
+docker tag task-manager:latest profdiegoluispires/task-manager:latest
 docker push profdiegoluispires/task-manager:latest
 ```
+
+---
+
+## Branches
+
+| Branch | Conteúdo |
+|--------|----------|
+| `main` | Código-fonte completo (Next.js + PostgreSQL + Docker + Testes) |
+| `dev_aula` | Tudo da main + k8s manifests + CI/CD |
+
+---
 
 ## License
 

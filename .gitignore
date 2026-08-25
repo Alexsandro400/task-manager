@@ -9,4 +9,4 @@ build
 *.env.test.local
 *.env.production.local
 coverage
-.next
+k8s/*.yaml
