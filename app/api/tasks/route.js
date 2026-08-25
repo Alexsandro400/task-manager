@@ -1,12 +1,31 @@
-import { getPool } from '@/lib/db'
 import { v4 as uuidv4 } from 'uuid'
 
 const VALID_STATUSES = ['pendente', 'em-andamento', 'concluida']
 const VALID_PRIORITIES = ['baixa', 'media', 'alta']
 
+async function getPool() {
+  // Se estiver rodando no build time, usa um mock
+  if (process.env.NEXT_PHASE) {
+    console.warn('⚠️  Using mock pool for build time')
+    return {
+      query: async () => ({ rows: [] }),
+      end: async () => {},
+    }
+  }
+  
+  const { Pool } = await import('pg')
+  return new Pool({
+    host: process.env.DATABASE_HOST || 'localhost',
+    port: parseInt(process.env.DATABASE_PORT || '5432'),
+    database: process.env.DATABASE_NAME || 'task_manager',
+    user: process.env.DATABASE_USER || 'admin',
+    password: process.env.DATABASE_PASSWORD || 'admin',
+  })
+}
+
 export async function GET() {
   try {
-    const pool = getPool()
+    const pool = await getPool()
     const result = await pool.query(
       'SELECT id, title, description, status, priority, created_at FROM tasks ORDER BY created_at DESC'
     )
@@ -35,7 +54,7 @@ export async function POST(request) {
       return Response.json({ error: `Invalid priority. Must be one of: ${VALID_PRIORITIES.join(', ')}` }, { status: 400 })
     }
 
-    const pool = getPool()
+    const pool = await getPool()
     const id = uuidv4()
     const currentStatus = status || 'pendente'
     const currentPriority = priority || 'media'
@@ -71,7 +90,7 @@ export async function PUT(request) {
       return Response.json({ error: `Invalid priority. Must be one of: ${VALID_PRIORITIES.join(', ')}` }, { status: 400 })
     }
 
-    const pool = getPool()
+    const pool = await getPool()
     const result = await pool.query(
       `UPDATE tasks 
        SET title = COALESCE($1, title), 
@@ -104,7 +123,7 @@ export async function DELETE(request) {
       return Response.json({ error: 'Task ID is required' }, { status: 400 })
     }
 
-    const pool = getPool()
+    const pool = await getPool()
     const result = await pool.query('DELETE FROM tasks WHERE id = $1 RETURNING *', [id])
 
     if (result.rows.length === 0) {
