@@ -7,8 +7,7 @@
     "build": "next build",
     "start": "node server.js",
     "lint": "next lint",
-    "test": "jest",
-    "init-db": "node init-db.js"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "dependencies": {
     "next": "14.2.35",

@@ -64,10 +64,16 @@ task-manager/
 
 ```bash
 # Iniciar containers
-docker-compose up -d
+docker compose up -d
+
+# Aguardar banco de dados inicializar
+sleep 5
 
 # Acessar a aplicação
 open http://localhost:3000
+
+# Verificar health check
+curl http://localhost:3000/api/health
 ```
 
 ### Desenvolvimento Local
