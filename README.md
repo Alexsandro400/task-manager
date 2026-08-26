@@ -1,6 +1,9 @@
 # Task Manager
 
-Gerenciador de Tarefas (Task Manager) com Next.js 14, PostgreSQL, Kubernetes e CI/CD.
+Gerenciador de Tarefas (Task Manager) com Next.js 14 e PostgreSQL.
+
+> Esta branch (`main`) contém só a aplicação. Kubernetes, Terraform, CI/CD e
+> observabilidade ficam na branch `dev_aula`, usada na aula.
 
 ## Demonstração
 
@@ -21,8 +24,6 @@ Gerenciador de Tarefas (Task Manager) com Next.js 14, PostgreSQL, Kubernetes e C
 - **Backend**: Next.js API Routes
 - **Banco de dados**: PostgreSQL 15
 - **Containerização**: Docker, Docker Compose
-- **Orquestração**: Kubernetes
-- **CI/CD**: GitHub Actions
 - **Testes**: Jest
 
 ## Estrutura do Projeto
@@ -38,14 +39,6 @@ task-manager/
 │   ├── db.js         # Pool PostgreSQL
 │   └── dbConfig.js   # Configuração de conexão
 ├── tests/            # Testes Jest para API
-├── k8s/              # Manifets Kubernetes
-│   ├── configmap.yaml
-│   ├── app-deployment.yaml
-│   ├── app-service.yaml
-│   ├── postgres-deployment.yaml
-│   └── postgres-service.yaml
-├── .github/workflows/ # CI/CD GitHub Actions
-│   └── ci-cd.yml
 ├── Dockerfile        # Build da imagem Docker
 ├── docker-compose.yml # Ambiente local com Docker Compose
 ├── next.config.js    # Config Next.js
@@ -141,78 +134,16 @@ docker build -t task-manager .
 docker run -p 3000:3000 task-manager
 ```
 
-## Kubernetes Deploy
+## Kubernetes, Terraform, CI/CD e Observabilidade
 
-### Pré-requisitos
-
-- K3d ou cluster Kubernetes
-- `kubectl` configurado
-
-### Criar Cluster (K3d)
-
-```bash
-k3d cluster create taskmanager
-```
-
-### Aplicar Manifests
-
-```bash
-# Aplicar ConfigMap
-kubectl apply -f k8s/configmap.yaml
-
-# Aplicar PostgreSQL
-kubectl apply -f k8s/postgres-deployment.yaml
-kubectl apply -f k8s/postgres-service.yaml
-
-# Aguardar PostgreSQL estar pronto
-kubectl wait --for=condition=ready pod -l app=postgres --timeout=120s
-
-# Aplicar aplicação
-kubectl apply -f k8s/app-deployment.yaml
-kubectl apply -f k8s/app-service.yaml
-```
-
-### Verificar Deploy
-
-```bash
-# Ver pods
-kubectl get pods
-
-# Ver services
-kubectl get services
-
-# Ver logs do app
-kubectl logs -l app=task-manager -f
-```
-
-### Acessar Aplicação
-
-```bash
-# Local (K3d)
-open http://localhost:30080
-
-# Com port-forward
-kubectl port-forward service/task-manager-service 3000:3000
-open http://localhost:3000
-```
-
-## CI/CD GitHub Actions
-
-O workflow `.github/workflows/ci-cd.yml` executa:
-
-1. **test**: Roda `npm test` para validar a API
-2. **build**: Build da imagem Docker com tag SHA
-3. **deploy**: Push para Docker Hub (apenas branch `dev_aula`)
-
-### Secrets Necessários
-
-- `DOCKER_USERNAME`: Nome de usuário do Docker Hub
-- `DOCKER_PASSWORD`: Token de acesso do Docker Hub
+Não fazem parte desta branch. Veja a branch `dev_aula` deste repositório para
+os manifests Kubernetes, o Terraform (k3d + Helm) e o workflow de CI/CD.
 
 ## Branches
 
-- **main**: Código completo (Next.js + API + Docker) - sem k8s/.github
-- **dev_aula**: Código + k8s + CI/CD (para aula)
+- **main**: só a aplicação (Next.js + API + Docker).
+- **dev_aula**: aplicação + Kubernetes + Terraform + CI/CD + observabilidade
+  (usada na aula).
 
 ## Licença
 
