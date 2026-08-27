@@ -23,8 +23,5 @@
     "postcss": "^8.4.33",
     "tailwindcss": "^3.4.1",
     "jest": "^29.7.0"
-  },
-  "_moduleAliases": {
-    "pg": "mock-pg.js"
   }
 }

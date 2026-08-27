@@ -170,7 +170,7 @@ export default function TaskManager() {
                         setNewTask({ ...newTask, title: e.target.value })
                       }
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
                     placeholder="Digite o título da tarefa"
                     required
                   />
@@ -190,7 +190,7 @@ export default function TaskManager() {
                         setNewTask({ ...newTask, description: e.target.value })
                       }
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
                     placeholder="Digite a descrição da tarefa"
                     rows={3}
                   />
@@ -211,7 +211,7 @@ export default function TaskManager() {
                           setNewTask({ ...newTask, status: e.target.value })
                         }
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
                     >
                       <option value="pendente">⏳ Pendente</option>
                       <option value="em-andamento">🔄 Em Andamento</option>
@@ -233,7 +233,7 @@ export default function TaskManager() {
                           setNewTask({ ...newTask, priority: e.target.value })
                         }
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
                     >
                       <option value="baixa">🟢 Baixa</option>
                       <option value="media">🟡 Média</option>

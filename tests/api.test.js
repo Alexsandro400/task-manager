@@ -1,40 +1,18 @@
-import { v4 as uuidv4 } from 'uuid';
-
-// Mock database para testes
-let tasks = [
-  {
-    id: '123e4567-e89b-12d3-a456-426614174000',
-    title: 'Tarefa de teste',
-    description: 'Descrição da tarefa de teste',
-    status: 'pendente',
-    priority: 'media',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-];
-
 describe('Task API', () => {
-  beforeEach(() => {
-    tasks = [
-      {
-        id: '123e4567-e89b-12d3-a456-426614174000',
-        title: 'Tarefa de teste',
-        description: 'Descrição da tarefa de teste',
-        status: 'pendente',
-        priority: 'media',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-    ];
-  });
-
   describe('GET /api/tasks', () => {
     it('deve retornar lista de tarefas', async () => {
+      // Garante ao menos uma tarefa, sem depender de estado pré-existente no banco
+      await fetch('http://localhost:3000/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: 'Tarefa para listagem', status: 'pendente', priority: 'media' }),
+      });
+
       const response = await fetch('http://localhost:3000/api/tasks');
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.tasks).toBeInstanceOf(Array);
+      expect(Array.isArray(data.tasks)).toBe(true);
       expect(data.tasks.length).toBeGreaterThan(0);
     });
   });
@@ -92,22 +70,18 @@ describe('Task API', () => {
 
   describe('PUT /api/tasks', () => {
     it('deve atualizar uma tarefa existente', async () => {
-      const taskId = uuidv4();
-      tasks.push({
-        id: taskId,
-        title: 'Tarefa original',
-        description: 'Descrição original',
-        status: 'pendente',
-        priority: 'media',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+      const createResponse = await fetch('http://localhost:3000/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: 'Tarefa original', status: 'pendente', priority: 'media' }),
       });
+      const { task: createdTask } = await createResponse.json();
 
       const response = await fetch('http://localhost:3000/api/tasks', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: taskId,
+          id: createdTask.id,
           title: 'Tarefa atualizada',
           status: 'em-andamento',
         }),
@@ -139,21 +113,17 @@ describe('Task API', () => {
 
   describe('DELETE /api/tasks', () => {
     it('deve deletar uma tarefa', async () => {
-      const taskId = uuidv4();
-      tasks.push({
-        id: taskId,
-        title: 'Tarefa para deletar',
-        description: 'Descrição',
-        status: 'pendente',
-        priority: 'media',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+      const createResponse = await fetch('http://localhost:3000/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: 'Tarefa para deletar', status: 'pendente', priority: 'media' }),
       });
+      const { task: createdTask } = await createResponse.json();
 
       const response = await fetch('http://localhost:3000/api/tasks', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: taskId }),
+        body: JSON.stringify({ id: createdTask.id }),
       });
 
       const data = await response.json();

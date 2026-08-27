@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 const VALID_STATUSES = ['pendente', 'em-andamento', 'concluida']
 const VALID_PRIORITIES = ['baixa', 'media', 'alta']
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 async function getPool() {
   // Se estiver rodando no build time, usa um mock
@@ -82,6 +83,10 @@ export async function PUT(request) {
       return Response.json({ error: 'Task ID is required' }, { status: 400 })
     }
 
+    if (!UUID_REGEX.test(id)) {
+      return Response.json({ error: 'Task not found' }, { status: 404 })
+    }
+
     if (status && !VALID_STATUSES.includes(status)) {
       return Response.json({ error: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}` }, { status: 400 })
     }
@@ -121,6 +126,10 @@ export async function DELETE(request) {
 
     if (!id) {
       return Response.json({ error: 'Task ID is required' }, { status: 400 })
+    }
+
+    if (!UUID_REGEX.test(id)) {
+      return Response.json({ error: 'Task not found' }, { status: 404 })
     }
 
     const pool = await getPool()
