@@ -1,14 +1,13 @@
-const { createServer } = require('http')
-const { parse } = require('url')
-const next = require('next')
+import { createServer } from 'http'
+import { parse } from 'url'
+import next from 'next'
+import { initDatabase } from './lib/db.js'
 
 const dev = process.env.NODE_ENV !== 'production'
 const hostname = '0.0.0.0'
 const port = 3000
 
-import('./lib/db.js').then(({ initDatabase }) => {
-  initDatabase().catch(err => console.error('❌ Failed to initialize database:', err))
-})
+initDatabase().catch(err => console.error('❌ Failed to initialize database:', err))
 
 const app = next({ dev, hostname, port })
 const handle = app.getRequestHandler()
