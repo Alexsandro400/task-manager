@@ -32,7 +32,7 @@ jobs:
       - run: npm install
       - run: npm run build
       - name: Iniciar aplicação em background
-        run: npm start &
+        run: npm start > app.log 2>&1 &
       - name: Esperar aplicação responder
         run: |
           for i in $(seq 1 30); do
@@ -43,7 +43,8 @@ jobs:
             echo "Aguardando aplicação... ($i)"
             sleep 2
           done
-          echo "Aplicação não respondeu a tempo"
+          echo "Aplicação não respondeu a tempo. Log do servidor:"
+          cat app.log
           exit 1
       - run: npm test
 
