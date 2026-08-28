@@ -26,9 +26,9 @@ COPY --from=builder /app/init-db.js ./init-db.js
 COPY --from=builder /app/app ./app
 COPY --from=builder /app/lib ./lib
 COPY --from=builder /app/jsconfig.json ./jsconfig.json
-COPY --from=builder /app/next.config.js ./next.config.js
-COPY --from=builder /app/tailwind.config.js ./tailwind.config.js
-COPY --from=builder /app/postcss.config.js ./postcss.config.js
+COPY --from=builder /app/next.config.cjs ./next.config.cjs
+COPY --from=builder /app/tailwind.config.cjs ./tailwind.config.cjs
+COPY --from=builder /app/postcss.config.cjs ./postcss.config.cjs
 
 EXPOSE 3000
 
